@@ -10,9 +10,10 @@ class HomePage extends StatefulWidget{
 
 class _HomePageState extends State<HomePage>{
   @override
-  Widget build(BuildContext context) {
-    // TODO: implement build
-    throw UnimplementedError();
-  }
+Widget build(BuildContext context){
+      return Scaffold(
+      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+      );
+}
 
 }

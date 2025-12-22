@@ -12,6 +12,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+       debugShowCheckedModeBanner: false,
       title: 'LittUp',
       theme: ThemeData(
         
@@ -24,10 +25,7 @@ class MyApp extends StatelessWidget {
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key, required this.title});
-
-  
-
-  final String title;
+   final String title;
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();

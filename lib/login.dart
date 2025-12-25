@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'signUp.dart';
-import 'home.dart';
+import 'package:littup/home.dart';
+import 'package:littup/signUp.dart';
 
 class LoginPage extends StatefulWidget{
   const LoginPage({super.key});
@@ -8,82 +8,97 @@ class LoginPage extends StatefulWidget{
 @override
   State<LoginPage> createState() =>_LoginPageState();
 
-  
 }
 
 class _LoginPageState extends State<LoginPage>{
- final _formKey=GlobalKey<FormState>();
- final TextEditingController _emailController=TextEditingController();
- final TextEditingController _passwordController=TextEditingController();
-
-void _login(){
-  if(_formKey.currentState!.validate()){
-                    Navigator.push(context, MaterialPageRoute(builder: (context)=> const HomePage()));
-
-  }
-}
+ 
   @override
 Widget build(BuildContext context){
       return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+      backgroundColor: const Color.fromARGB(255, 199, 228, 255),
         body: Center(
-          child: Padding(padding:const EdgeInsets.all(20.0),
-          child: Form(
-            key: _formKey,
-            child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+            CircleAvatar(
+              backgroundColor: Colors.blue,
+              radius: 25,
+              child: Icon(Icons.edit, color: Colors.white, size: 32),
+              ),
+                const SizedBox(height: 20),
+
+              Text("LittUp", style: TextStyle(fontSize: 22)),
+                const SizedBox(height: 15),
+              Text("Share your stories, inspire others", style: TextStyle(fontSize: 18,color: Colors.grey)),
+                const SizedBox(height: 25),
+              SizedBox(
+                width: 380,
+                child:
+                 Card(
+                  
+               color: Colors.white,
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
               
-              children: [
-                const Icon(Icons.person,size:100,color: Colors.blue),
+                children: <Widget>[
                 const SizedBox(height: 20),
-                const Text('Login', style: TextStyle(fontSize: 30,fontWeight: FontWeight.bold)),
+                  ListTile(
+                    title: Text("Welcome back",style: TextStyle(fontWeight: FontWeight.w600),),
+                    subtitle: const Text("Log in to your account to continue", style: TextStyle(fontSize: 16),),
+                  ),
                 const SizedBox(height: 20),
-                TextFormField(
-                  controller: _emailController,
-                  decoration: const InputDecoration(labelText: 'Email',border: OutlineInputBorder()),
-                  keyboardType: TextInputType.emailAddress,
-                  validator: (value) {
-                    if(value==null||value.isEmpty){
-                      return 'Enter email';}
-                    if(!RegExp(r'\S+@\S+\.\S+').hasMatch(value)){
-                      return 'Enter valid email';
-                    }
-                    return null;
-                  },
-                ),
+                  Padding(padding: EdgeInsets.symmetric(horizontal: 15),
+                  child: 
+                  TextField(
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: 'Email',
+                      floatingLabelBehavior: FloatingLabelBehavior.always, 
+                      hintText: 'Enter valid email',
+                    ),
+                  )
+                  ),
+
+                  Padding(padding: EdgeInsets.only(left: 15.0, right: 15.0, top: 15, bottom: 0),
+                   child: 
+                   TextField(
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: 'Password',
+                      floatingLabelBehavior: FloatingLabelBehavior.always, 
+                      hintText: 'Enter your password',
+                    ),
+                  ),
+                  ),
+                  SizedBox(
+                    height: 65,
+                    width: 360,
+                    child: Padding(padding: const EdgeInsets.only(top: 20.0),
+                    child: ElevatedButton(style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.black,
+                    ), onPressed: (){
+                    Navigator.push(context, MaterialPageRoute(builder: (context)=> const HomePage()));
+                    }, child: Text('Log in', style: TextStyle(color: Colors.white, fontSize: 20),)),
+                    ),
+                  ),
                 const SizedBox(height: 20),
-                TextFormField(
-                  controller: _passwordController,
-                  decoration: const InputDecoration(labelText: 'Password',border: OutlineInputBorder()),
-                  obscureText: true,
-                  keyboardType: TextInputType.emailAddress,
-                  validator: (value) {
-                    if(value==null||value.isEmpty){
-                      return 'Enter pasword';}
-                    if(value.length<6){
-                      return 'Password too short';
-                    }
-                    return null;
-                  },
-                ),
+                TextButton(onPressed: (){
+                    Navigator.push(context, MaterialPageRoute(builder: (context)=> const SignupPage()));
+                }, child:
+                 const Text('Dont have an account? Sign up', style: TextStyle(color: Colors.black),)
+                 ),
                 const SizedBox(height: 20),
-                SizedBox(
-                  width: double.infinity,//what does this do
-                  height: 50,
-                  child: ElevatedButton(onPressed: _login, child: const Text('Login')),
-                ),
-                const SizedBox(height: 10),
-                TextButton( child: const Text("Don't have an account? Signup",
-                style:TextStyle(color: Colors.blue,fontSize: 16)), onPressed:(){
-          Navigator.push(context, MaterialPageRoute(builder: (context)=> const SignupPage()));
-                }
-                )
-              ],
-            )
-            )
+
+                ],
+                 
+
+              ),
+
+              ),
+              ),
+             
+            ],
           ),
-        ),
         )
       );
 }

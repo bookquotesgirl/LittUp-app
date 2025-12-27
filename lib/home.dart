@@ -20,30 +20,73 @@ class _HomePageState extends State<HomePage>{
 Widget build(BuildContext context){
       return Scaffold(
         backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: Text('LittUp', style: TextStyle(fontSize: 18, fontWeight:FontWeight.bold),),
-        toolbarHeight: 40,
-        leading: CircleAvatar(
-        backgroundColor: Colors.blue,
-        child: Icon(Icons.edit, color: Colors.white,
         
-        )
-      ),
-      actions:<Widget> [
-        ElevatedButton.icon(style: ElevatedButton.styleFrom(backgroundColor: Colors.black,), onPressed: (){}, icon: const Icon(Icons.home_outlined,color: Colors.white,),label: const Text('Home',style: TextStyle(color: Colors.white),), ),
-        const SizedBox(width: 10,),
-        ElevatedButton.icon(style: ElevatedButton.styleFrom(backgroundColor: Colors.black), onPressed: (){}, icon: const Icon(CupertinoIcons.pen,color: Colors.white,),label: const Text('Write',style: TextStyle(color: Colors.white),), ),
-        const SizedBox(width: 10,),
-        ElevatedButton.icon(style: ElevatedButton.styleFrom(backgroundColor: Colors.black), onPressed: (){}, icon: const Icon(Icons.person_2_outlined,color: Colors.white,),label: const Text('Profile',style: TextStyle(color: Colors.white),), ),
-        const SizedBox(width: 10,),
-        ElevatedButton.icon(style: ElevatedButton.styleFrom(backgroundColor: Colors.black), onPressed: (){}, icon: const Icon(Icons.person_2_outlined,color: Colors.white,),label: const Text('Profile',style: TextStyle(color: Colors.white),), ),
-
-
-      ],
-      ),
-      body: Column(
+      appBar: AppBar(
+  elevation: 0,
+  backgroundColor: Colors.white,
+  automaticallyImplyLeading: false,
+  shape: const Border(
+    bottom: BorderSide(color: Colors.grey, width: 0.5),
+  ),
+  title: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text('Discover Stories', style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),),
+          // Left: logo + title
+          Row(
+            children: const [
+              CircleAvatar(
+                radius: 16,
+                backgroundColor: Color.fromARGB(255, 8, 74, 128),
+                child: Icon(Icons.edit, color: Colors.white, size: 18),
+              ),
+              SizedBox(width: 8),
+              Text(
+                'LittUp',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+
+          Row(
+            children: [
+             ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.black),
+              onPressed: () {},
+              icon: const Icon(Icons.home_outlined, color: Colors.white),
+              label: const Text('Home', style: TextStyle(color: Colors.white)),
+            ),
+            SizedBox(width: 10,),
+              ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.black),
+              onPressed: () {},
+              icon: const Icon(CupertinoIcons.pen, color: Colors.white),
+              label: const Text('Write', style: TextStyle(color: Colors.white)),
+            ),
+            SizedBox(width: 10,),
+
+             ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.black),
+              onPressed: () {},
+              icon: const Icon(Icons.person_2_outlined, color: Colors.white),
+              label:
+                  const Text('Profile', style: TextStyle(color: Colors.white)),
+            ),
+            ],
+          ),
+        ],
+      ),
+    ),
+
+      body:Padding(padding: 
+      const EdgeInsets.all(40),
+      child: 
+       Column(
+        children: [
+          Align(
+            alignment: AlignmentGeometry.topLeft,
+          child: Text('Discover Stories', style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),),
+
+          ),
           Row(
             children: [
               SearchBar(
@@ -139,7 +182,8 @@ Widget build(BuildContext context){
 
                   ],
                 ),
-              );
+              )
+      );
     
 }
 

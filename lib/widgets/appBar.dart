@@ -1,5 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:littup/home.dart';
+import 'package:littup/profilePage.dart';
+
+
 import '../writePage.dart';
 
 class LittAppBar extends StatelessWidget implements PreferredSizeWidget{
@@ -41,7 +45,10 @@ Widget build(BuildContext context){
             children: [
              ElevatedButton.icon(
               style: ElevatedButton.styleFrom(backgroundColor: Colors.black),
-              onPressed: () {},
+              onPressed: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (context)=> const HomePage()));
+
+              },
               icon: const Icon(Icons.home_outlined, color: Colors.white),
               label: const Text('Home', style: TextStyle(color: Colors.white)),
             ),
@@ -59,7 +66,10 @@ Widget build(BuildContext context){
 
              ElevatedButton.icon(
               style: ElevatedButton.styleFrom(backgroundColor: Colors.black),
-              onPressed: () {},
+              onPressed: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (context)=> const Profilepage()));
+
+              },
               icon: const Icon(Icons.person_2_outlined, color: Colors.white),
               label:
                   const Text('Profile', style: TextStyle(color: Colors.white)),

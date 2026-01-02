@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget {
       title: 'LittUp',
       theme: ThemeData(
         
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color.fromARGB(255, 44, 151, 146)),
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color.fromARGB(255, 255, 255, 255)),
       ),
       home: const SplashScreen(title: 'LittUp'),
     );

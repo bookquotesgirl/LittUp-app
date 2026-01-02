@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import '../writePage.dart';
 
 class LittAppBar extends StatelessWidget implements PreferredSizeWidget{
   const LittAppBar({super.key});
@@ -47,7 +48,10 @@ Widget build(BuildContext context){
             SizedBox(width: 10,),
               ElevatedButton.icon(
               style: ElevatedButton.styleFrom(backgroundColor: Colors.black),
-              onPressed: () {},
+              onPressed: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (context)=> const Writepage()));
+
+              },
               icon: const Icon(CupertinoIcons.pen, color: Colors.white),
               label: const Text('Write', style: TextStyle(color: Colors.white)),
             ),

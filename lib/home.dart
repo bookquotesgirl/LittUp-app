@@ -24,6 +24,7 @@ Widget build(BuildContext context){
       appBar: AppBar(
   elevation: 0,
   backgroundColor: Colors.white,
+
   automaticallyImplyLeading: false,
   shape: const Border(
     bottom: BorderSide(color: Colors.grey, width: 0.5),
@@ -78,7 +79,7 @@ Widget build(BuildContext context){
     ),
 
       body:Padding(padding: 
-      const EdgeInsets.all(40),
+      const EdgeInsets.all(60),
       child: 
        Column(
         children: [
@@ -87,31 +88,70 @@ Widget build(BuildContext context){
           child: Text('Discover Stories', style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),),
 
           ),
-          Row(
+          SizedBox(
+            width: double.infinity,
+            height: 80,
+            
+          child: Row(
             children: [
+              Expanded(child: 
               SearchBar(
-            leading: Icon(Icons.search),
+                side: WidgetStateProperty.all<BorderSide>(
+    const BorderSide(
+      color: Colors.black26, 
+      width: 1.0, 
+    ),
+  ),
+backgroundColor: const WidgetStatePropertyAll<Color>(Colors.white), // Set the background color
+  surfaceTintColor: const WidgetStatePropertyAll<Color>(Colors.transparent),   //to prevent overlay
+  elevation: WidgetStateProperty.all(0),         
+  leading: Icon(Icons.search),
             hintText:  'Search by title, author or genre',
-          ),
-          DropdownButton(
-            value: dropdownvalue,
-            items:
-             items.map((String items){
-              return DropdownMenuItem(
-                value: items,
-                child: Text(items));
-             }
-             ).toList(), 
-             onChanged:
-              (String? newValue){
-                setState(() {
-                  dropdownvalue=newValue!;
-                });
-              },
+            
+            shape: WidgetStateProperty.all(
+              RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              )
             ),
-            ],
             
           ),
+              ),
+              const SizedBox(width: 20),
+              SizedBox(
+  width: 220,
+  child: 
+              InputDecorator(
+                decoration: const InputDecoration(border: OutlineInputBorder(
+
+                ),
+                contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 0),),
+                
+                child: DropdownButtonHideUnderline(
+                  child: 
+              DropdownButton(
+                
+                value: dropdownvalue,
+                items:
+                 items.map((String items){
+                  return DropdownMenuItem(
+                    value: items,
+                    child: Text(items));
+                 }
+                 ).toList(), 
+                 onChanged:
+                  (String? newValue){
+                    setState(() {
+                      dropdownvalue=newValue!;
+                    });
+                  },
+                ),
+                ),),
+              ),
+            ],
+          
+          ),
+          ),
+         
           Expanded(
             child: GridView.builder(
               padding: const EdgeInsets.all(12),
@@ -138,26 +178,42 @@ Widget build(BuildContext context){
                     child: Image.asset('images/download.jpeg',height: 210,width: double.infinity,fit: BoxFit.cover,),
                       
                     ),
+                    Padding(padding:
+                    const EdgeInsets.all(20),
+                    child:
                     Row(
-                      children: [
-                        const Padding(padding: EdgeInsets.all(6),
-                    
-                    child: Text('Finding Light', style: TextStyle(fontSize: 14,fontWeight: FontWeight.bold),),
-                    ),
-                    Text('Inspiratinal', style: TextStyle(fontSize: 12,fontWeight: FontWeight.bold,backgroundColor: const Color.fromARGB(193, 158, 158, 158)),),
 
+                      children: [
+  
+                    
+                    Text('Finding Light', style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold),),
+                    Spacer(),
+                    
+                      Chip(label: 
+                    Text('Inspiratinal', style: TextStyle(fontSize: 14,fontWeight: FontWeight.bold,),
+                    ),
+                    backgroundColor: Colors.grey.shade300,
+                      ),
+                    
                       ],
                     ),
+                    ),
+                    Padding(padding:
+                    const EdgeInsets.all(20),
+                    child:
                     Row(
                       children: [
-                        const Padding(padding: EdgeInsets.all(6),
                     
-                    child: Text('by John Doe', style: TextStyle(fontSize: 14,fontWeight: FontWeight.bold),),
-                    ),
+                    Text('by John Doe', style: TextStyle(fontSize: 14,fontWeight: FontWeight.bold),),
+                    Spacer(),
                     Text('1 year ago', style: TextStyle(fontSize: 14,fontWeight: FontWeight.bold),),
 
                       ],
                     ),
+                    ),
+                    Padding(padding:
+                    const EdgeInsets.all(20),
+                    child:
                     Row(
                       children: [
                         Icon(Icons.favorite_border,color: Colors.grey,size: 14,),
@@ -170,13 +226,14 @@ Widget build(BuildContext context){
                         Text('670',style: TextStyle(color: Colors.grey,fontSize: 14),),
                       ],
                     ),
+                    )
                     ],
                   ),
                 );
               },
               ),
           ),
-                
+            
                     
                   
 

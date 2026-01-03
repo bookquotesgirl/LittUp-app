@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import './widgets/appBar.dart';
+import 'storyPage.dart';
 class HomePage extends StatefulWidget{
   const HomePage({super.key});
 
@@ -113,7 +114,16 @@ backgroundColor: const WidgetStatePropertyAll<Color>(Colors.white), // Set the b
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15),
                   ),
-                  child: Column(
+                  child:
+                  InkWell(
+                    borderRadius: BorderRadius.circular(15),
+                    onTap: (){
+                    Navigator.push(context, MaterialPageRoute(builder: (context)=> const Storypage()));
+                    },
+                    child:
+
+                   Column(
+
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       ClipRRect(
@@ -174,7 +184,9 @@ backgroundColor: const WidgetStatePropertyAll<Color>(Colors.white), // Set the b
                     )
                     ],
                   ),
+                  ),
                 );
+
               },
               ),
           ),

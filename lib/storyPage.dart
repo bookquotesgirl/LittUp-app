@@ -15,7 +15,8 @@ Widget build(BuildContext context){
   return Scaffold(
         backgroundColor: Colors.white,
       appBar: const LittAppBar(),
-      body: Padding(padding: 
+      body: SingleChildScrollView(
+     padding: 
       EdgeInsets.only(
         top:20,
         bottom:20,
@@ -52,6 +53,7 @@ Widget build(BuildContext context){
           ),
           Text(
   '''
+
 Sometimes life knocks you down. You lose your job, a relationship ends, or you face a challenge that seems insurmountable. I know because I've been there.
 
 Two years ago, I was at my lowest point. I had just graduated from college with no job prospects, mounting debt, and a deep sense of failure. Every morning felt like a battle just to get out of bed.
@@ -68,8 +70,129 @@ Today, I'm not where I thought I'd be at 25, but I'm somewhere better. I'm stron
 
 If you're going through tough times, know this: you are stronger than you think, and this too shall pass.
   ''',
-)
+),
+ Divider(
+  color: Colors.black, // Color of the line
+  thickness: 0.5,        // Thickness of the line
+  height: 20,          // Total height of the box, padding is computed from this
+ 
+       // Empty space at the end (right) of the line
+),
+Padding(padding: 
+EdgeInsets.only(
+  top: 20,
+),
+child:
+Row(
+children: [
+     ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.black,),
+              onPressed: () {
 
+              },
+              icon: const Icon(Icons.favorite, color: Colors.white),
+              label: const Text('38', style: TextStyle(color: Colors.white)),
+            ),
+            SizedBox(width:40),
+            Icon(Icons.messenger_outline_rounded,color: Colors.grey,),
+            SizedBox(width:10),
+            Text('12 Comments'),
+            SizedBox(width:40),
+             Icon(Icons.remove_red_eye_outlined,color: Colors.grey,),
+            SizedBox(width:10),
+            Text('120 Reads'),
+],
+),
+),
+ Divider(
+  color: Colors.black, // Color of the line
+  thickness: 0.5,        // Thickness of the line
+  height: 20,          // Total height of the box, padding is computed from this
+ 
+       // Empty space at the end (right) of the line
+),
+Text('Comments (1)'),
+Container(
+  
+    decoration: BoxDecoration(
+              border: Border.all(
+                color: Colors.black,
+                width: 1.0,
+              ),
+              borderRadius: BorderRadius.circular(15),
+            ),
+  child: 
+  Padding(padding:
+  EdgeInsets.all(40),
+  child:
+  Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      TextField(
+        
+         decoration: InputDecoration(
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              
+              hintText: 'Share your thoughts...',
+              
+            ),
+            keyboardType: TextInputType.multiline,
+      ),
+      SizedBox(height: 30,),
+      ElevatedButton(onPressed: (){}, 
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.black,),
+  
+            child: 
+      Text('Post comment',style: TextStyle(color: Colors.white),),
+      ),
+    ],
+  ),
+  ),
+),
+      SizedBox(height: 30,),
+Container(
+  
+    decoration: BoxDecoration(
+              border: Border.all(
+                color: Colors.black,
+                width: 1.0,
+              ),
+              borderRadius: BorderRadius.circular(15),
+            ),
+  child: 
+  Padding(padding:
+  EdgeInsets.all(40),
+  child:
+  Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Row(
+        children: [
+          CircleAvatar(
+            radius: 20,
+            backgroundColor: Colors.grey,
+            child: 
+            Text('ED'),
+          ),
+      SizedBox(width: 20,),
+          
+          Column(
+            children: [
+              Text('Emma Davis',style:TextStyle(fontWeight: FontWeight.bold)),
+              Text('About a year ago'),
+            ],
+          ),
+
+        ],
+      ),
+      SizedBox(height: 20,),
+      Text('This is incredible',style:TextStyle(fontWeight: FontWeight.bold,fontSize: 16)),
+    ],
+  ),
+  ),
+),
         ],
       ),
       )

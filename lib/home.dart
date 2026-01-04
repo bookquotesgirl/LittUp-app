@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import './widgets/appBar.dart';
 import 'storyPage.dart';
 class HomePage extends StatefulWidget{
@@ -42,6 +43,10 @@ Widget build(BuildContext context){
             children: [
               Expanded(child: 
               SearchBar(
+                constraints: BoxConstraints(
+                  minHeight: 40,
+                  maxHeight: 80,
+                ),
                 side: WidgetStateProperty.all<BorderSide>(
     const BorderSide(
       color: Colors.black26, 
@@ -64,22 +69,25 @@ backgroundColor: const WidgetStatePropertyAll<Color>(Colors.white), // Set the b
               ),
               const SizedBox(width: 20),
               SizedBox(
+                height: 40,
   width: 220,
   child: 
               InputDecorator(
                 decoration: const InputDecoration(border: OutlineInputBorder(
-
+                
                 ),
                 contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 0),),
                 
                 child: DropdownButtonHideUnderline(
+                  
                   child: 
               DropdownButton(
-                
+                elevation: 0,
                 value: dropdownvalue,
                 items:
                  items.map((String items){
                   return DropdownMenuItem(
+
                     value: items,
                     child: Text(items));
                  }
@@ -141,7 +149,7 @@ backgroundColor: const WidgetStatePropertyAll<Color>(Colors.white), // Set the b
                       children: [
   
                     
-                    Text('Finding Light', style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold),),
+                    Text('Finding Light', style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold),),
                     Spacer(),
                     
                       Chip(label: 

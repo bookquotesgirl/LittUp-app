@@ -1,10 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+
 // import 'home.dart';
-import 'login.dart';
+import 'signUp.dart';
+// import 'login.dart';
 // import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const MyApp());
 }
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -36,7 +45,7 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
     Future.delayed(const Duration(seconds: 3), () {
-                Navigator.push(context, MaterialPageRoute(builder: (context)=> const LoginPage()));
+                Navigator.push(context, MaterialPageRoute(builder: (context)=> const SignupPage()));
 
     });
   }

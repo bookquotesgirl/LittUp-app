@@ -2,6 +2,20 @@ import 'package:flutter/material.dart';
 
 import './widgets/appBar.dart';
 import 'storyPage.dart';
+class Story {
+  final String title;
+  final String author;
+  final String genre;
+  final String image;
+
+  Story({
+    required this.title,
+    required this.author,
+    required this.genre,
+    required this.image,
+  });
+}
+
 class HomePage extends StatefulWidget{
   const HomePage({super.key});
 
@@ -10,8 +24,33 @@ class HomePage extends StatefulWidget{
 }
 
 class _HomePageState extends State<HomePage>{
- 
   String dropdownvalue='All Catagories';
+ final TextEditingController _searchController=TextEditingController();
+
+  final List<Story> allStories=[
+    Story(title: 'Finding Light', author: 'John Doe', genre: 'Romance', image: 'images/download.jpeg'),
+    Story(title: 'Campus Days', author: 'Sara Lee', genre: 'Student Life', image: 'images/download.jpeg'),
+  ];
+   List<Story> filteredStories=[];
+
+  @override
+  void initState(){
+    super.initState();
+    filteredStories=List.from(allStories);
+  }
+  void _applyFilters(){
+    final query=_searchController.text.toLowerCase();
+    setState(() {
+      filteredStories=allStories.where((story){
+        final matchesSearch=
+         story.title.toLowerCase().contains(query)||story.author.toLowerCase().contains(query)||story.genre.toLowerCase().contains(query);
+         final matchesCategory=
+         dropdownvalue=='All Catagories'||story.genre==dropdownvalue;
+
+         return matchesSearch && matchesCategory;
+      }).toList();
+    });
+  }
   var items=[
     'All Catagories',
     'Romance',
@@ -43,6 +82,8 @@ Widget build(BuildContext context){
             children: [
               Expanded(child: 
               SearchBar(
+                controller: _searchController,
+                onChanged:(_)=> _applyFilters(),
                 constraints: BoxConstraints(
                   minHeight: 40,
                   maxHeight: 80,
@@ -97,6 +138,8 @@ backgroundColor: const WidgetStatePropertyAll<Color>(Colors.white), // Set the b
                     setState(() {
                       dropdownvalue=newValue!;
                     });
+                    _searchController.clear();
+                    _applyFilters();
                   },
                 ),
                 ),),
@@ -107,7 +150,14 @@ backgroundColor: const WidgetStatePropertyAll<Color>(Colors.white), // Set the b
           ),
          
           Expanded(
-            child: GridView.builder(
+            child: filteredStories.isEmpty?
+                   const Center(
+                    child: Text(
+                      'No stories found',
+                      style:TextStyle(color: Colors.grey),
+                    ),
+                  )
+            : GridView.builder(
               padding: const EdgeInsets.all(12),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 3,
@@ -115,98 +165,111 @@ backgroundColor: const WidgetStatePropertyAll<Color>(Colors.white), // Set the b
                 mainAxisSpacing: 12,
                 childAspectRatio: 1.0,
                 ), 
-                itemCount: 6,
+                
+                itemCount: filteredStories.length,
+                
               itemBuilder: (context, index){
+                final story=filteredStories[index];
                 return Card(
                 color: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15),
                   ),
                   child:
-                  InkWell(
-                    borderRadius: BorderRadius.circular(15),
-                    onTap: (){
-                    Navigator.push(context, MaterialPageRoute(builder: (context)=> const Storypage()));
-                    },
-                    child:
+                   InkWell(
+  borderRadius: BorderRadius.circular(15),
+  onTap: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const Storypage()),
+    );
+  },
+  child: Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      AspectRatio(
+        aspectRatio: 16 / 9,
+        child: ClipRRect(
+          borderRadius: const BorderRadius.vertical(
+            top: Radius.circular(15),
+          ),
+          child: Image.asset(
+            story.image,
+            fit: BoxFit.cover,
+          ),
+        ),
+      ),
 
-                   Column(
+      Padding(
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                story.title,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            Chip(
+              label: Text(story.genre),
+              backgroundColor: Colors.grey.shade300,
+            ),
+          ],
+        ),
+      ),
 
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      ClipRRect(
-                      borderRadius: const BorderRadius.vertical(
-                        top: Radius.circular(15),
-                      ),
-                    child: Image.asset('images/download.jpeg',height: 210,width: double.infinity,fit: BoxFit.cover,),
-                      
-                    ),
-                    Padding(padding:
-                    const EdgeInsets.all(20),
-                    child:
-                    Row(
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        child: Text(
+          'by ${story.author}',
+          style: const TextStyle(fontSize: 14),
+        ),
+      ),
 
-                      children: [
-  
-                    
-                    Text('Finding Light', style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold),),
-                    Spacer(),
-                    
-                      Chip(label: 
-                    Text('Inspiratinal', style: TextStyle(fontSize: 14,fontWeight: FontWeight.bold,),
-                    ),
-                    backgroundColor: Colors.grey.shade300,
-                      ),
-                    
-                      ],
-                    ),
-                    ),
-                    Padding(padding:
-                    const EdgeInsets.all(20),
-                    child:
-                    Row(
-                      children: [
-                    
-                    Text('by John Doe', style: TextStyle(fontSize: 14,fontWeight: FontWeight.bold),),
-                    Spacer(),
-                    Text('1 year ago', style: TextStyle(fontSize: 14,fontWeight: FontWeight.bold),),
+      const SizedBox(height: 6),
 
-                      ],
-                    ),
-                    ),
-                    Padding(padding:
-                    const EdgeInsets.all(20),
-                    child:
-                    Row(
-                      children: [
-                        Icon(Icons.favorite_border,color: Colors.grey,size: 14,),
-                        Text('67',style: TextStyle(color: Colors.grey,fontSize: 14),),
-                        SizedBox(width: 20),
-                         Icon(Icons.messenger_outline_rounded,color: Colors.grey,size: 14),
-                        Text('50',style: TextStyle(color: Colors.grey,fontSize: 14),),
-                        SizedBox(width: 20),
-                         Icon(Icons.remove_red_eye_outlined,color: Colors.grey,size: 14),
-                        Text('670',style: TextStyle(color: Colors.grey,fontSize: 14),),
-                      ],
-                    ),
-                    )
+      const Padding(
+        padding: EdgeInsets.symmetric(horizontal: 12),
+        child: Text(
+          '1 year ago',
+          style: TextStyle(fontSize: 13),
+        ),
+      ),
+
+      Padding(
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          children: const [
+            Icon(Icons.favorite_border, size: 14, color: Colors.grey),
+            SizedBox(width: 4),
+            Text('67', style: TextStyle(fontSize: 12)),
+            SizedBox(width: 16),
+            Icon(Icons.messenger_outline_rounded, size: 14, color: Colors.grey),
+            SizedBox(width: 4),
+            Text('50', style: TextStyle(fontSize: 12)),
+            SizedBox(width: 16),
+            Icon(Icons.remove_red_eye_outlined, size: 14, color: Colors.grey),
+            SizedBox(width: 4),
+            Text('670', style: TextStyle(fontSize: 12)),
+          ],
+        ),
+      ),
+    ],
+  ),
+),
+
+                );
+              },  
+            ),
+          ),  
                     ],
                   ),
                   ),
                 );
 
-              },
-              ),
-          ),
-            
-                    
-                  
-
-                  ],
-                ),
-              )
-      );
-    
 }
-
 }

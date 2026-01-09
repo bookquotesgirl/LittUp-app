@@ -8,13 +8,21 @@ class Story {
   final String genre;
   final String image;
 
+  int likes;
+  int views;
+  List<String> comments; 
+
   Story({
     required this.title,
     required this.author,
     required this.genre,
     required this.image,
-  });
+    this.likes = 0,
+    this.views = 0,
+    List<String>? comments,
+  }) : comments = comments ?? [];
 }
+
 
 class HomePage extends StatefulWidget{
   const HomePage({super.key});
@@ -181,7 +189,7 @@ backgroundColor: const WidgetStatePropertyAll<Color>(Colors.white), // Set the b
   onTap: () {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const Storypage()),
+      MaterialPageRoute(builder: (context) => Storypage(story: story)),
     );
   },
   child: Column(
@@ -243,18 +251,18 @@ backgroundColor: const WidgetStatePropertyAll<Color>(Colors.white), // Set the b
       Padding(
         padding: const EdgeInsets.all(12),
         child: Row(
-          children: const [
+          children:  [
             Icon(Icons.favorite_border, size: 14, color: Colors.grey),
             SizedBox(width: 4),
-            Text('67', style: TextStyle(fontSize: 12)),
+            Text('${story.likes}', style: TextStyle(fontSize: 12)),
             SizedBox(width: 16),
             Icon(Icons.messenger_outline_rounded, size: 14, color: Colors.grey),
             SizedBox(width: 4),
-            Text('50', style: TextStyle(fontSize: 12)),
+            Text('${story.comments.length}', style: TextStyle(fontSize: 12)),
             SizedBox(width: 16),
             Icon(Icons.remove_red_eye_outlined, size: 14, color: Colors.grey),
             SizedBox(width: 4),
-            Text('670', style: TextStyle(fontSize: 12)),
+            Text('$story.views', style: TextStyle(fontSize: 12)),
           ],
         ),
       ),

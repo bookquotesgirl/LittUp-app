@@ -2,14 +2,25 @@ import 'package:flutter/material.dart';
 import './widgets/appBar.dart';
 import 'home.dart';
 class Storypage extends StatefulWidget{
-  const Storypage({super.key});
+    final Story story;
+  const Storypage({super.key, required this.story});
 
 @override
   State<Storypage> createState() =>_StorypageState();
 }
 
 class _StorypageState extends State<Storypage>{
- 
+
+ int views = 120;
+int likes = 38;
+List<String> comments = ['This is incredible'];
+final TextEditingController _commentController = TextEditingController();
+@override
+void initState() {
+  super.initState();
+  views++; 
+}
+
   @override
 Widget build(BuildContext context){
   return Scaffold(
@@ -85,18 +96,22 @@ EdgeInsets.only(
 child:
 Row(
 children: [
-     ElevatedButton.icon(
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.black,),
-              onPressed: () {
+    ElevatedButton.icon(
+  style: ElevatedButton.styleFrom(backgroundColor: Colors.black),
+  onPressed: () {
+    setState(() {
+      likes++;
+    });
+  },
+  icon: const Icon(Icons.favorite, color: Colors.white),
+  label: Text('$likes', style: const TextStyle(color: Colors.white)),
+),
 
-              },
-              icon: const Icon(Icons.favorite, color: Colors.white),
-              label: const Text('38', style: TextStyle(color: Colors.white)),
-            ),
             SizedBox(width:40),
             Icon(Icons.messenger_outline_rounded,color: Colors.grey,),
             SizedBox(width:10),
-            Text('12 Comments'),
+            Text('${comments.length} Comments'),
+
             SizedBox(width:40),
              Icon(Icons.remove_red_eye_outlined,color: Colors.grey,),
             SizedBox(width:10),
@@ -129,24 +144,41 @@ Container(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       TextField(
-        
-         decoration: InputDecoration(
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              
-              hintText: 'Share your thoughts...',
-              
-            ),
-            keyboardType: TextInputType.multiline,
-      ),
+  controller: _commentController,
+  decoration: InputDecoration(
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(16),
+    ),
+    hintText: 'Share your thoughts...',
+  ),
+  keyboardType: TextInputType.multiline,
+),
+
       SizedBox(height: 30,),
-      ElevatedButton(onPressed: (){}, 
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.black,),
-  
-            child: 
-      Text('Post comment',style: TextStyle(color: Colors.white),),
-      ),
+      ElevatedButton(
+  onPressed: () {
+    final text=_commentController.text.trim();
+    if(text.isEmpty)
+     return;
+
+    setState(() {
+      widget.story.comments.add(text);
+      
+      _commentController.clear();
+    });
+  },
+  style: ElevatedButton.styleFrom(backgroundColor: Colors.black),
+  child: const Text('Post comment', style: TextStyle(color: Colors.white)),
+),
+Column(
+  children:widget.story.comments.map((comment){
+    return Padding(padding: 
+    const EdgeInsets.only(top:20),
+    child: Text(comment),
+    );
+  }).toList(),
+   
+)
     ],
   ),
   ),
@@ -166,31 +198,51 @@ Container(
   EdgeInsets.all(40),
   child:
   Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Row(
-        children: [
-          CircleAvatar(
-            radius: 20,
-            backgroundColor: Colors.grey,
-            child: 
-            Text('ED'),
-          ),
-      SizedBox(width: 20,),
-          
-          Column(
+  children: comments.map((comment) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 20),
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.black),
+          borderRadius: BorderRadius.circular(15),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(40),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Emma Davis',style:TextStyle(fontWeight: FontWeight.bold)),
-              Text('About a year ago'),
+              Row(
+                children: [
+                  const CircleAvatar(
+                    radius: 20,
+                    backgroundColor: Colors.grey,
+                    child: Text('ED'),
+                  ),
+                  const SizedBox(width: 20),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: const [
+                      Text('Emma Davis',
+                          style: TextStyle(fontWeight: FontWeight.bold)),
+                      Text('Just now'),
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Text(
+                comment,
+                style:
+                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
             ],
           ),
-
-        ],
+        ),
       ),
-      SizedBox(height: 20,),
-      Text('This is incredible',style:TextStyle(fontWeight: FontWeight.bold,fontSize: 16)),
-    ],
-  ),
+    );
+  }).toList(),
+),
+
   ),
 ),
         ],

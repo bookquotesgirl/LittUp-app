@@ -8,8 +8,9 @@ import 'storyPage.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 class UserProfile{
-  final String name;
+   String name;
   final String email;
+  String bio;
    int storyCount;
    int totalLikes;
    int totalViews;
@@ -17,6 +18,7 @@ class UserProfile{
 
   UserProfile({
     required this.name,
+    required this.bio,
     required this.email,
     required this.storyCount,
     required this.totalLikes,
@@ -28,6 +30,7 @@ class UserProfile{
   factory UserProfile.fromJson(Map<String,dynamic> json){
     return UserProfile(name: json['name'] ?? 'Anonymous', 
     email: json['email'] ?? '', 
+    bio: json['bio'] ?? '',
     storyCount: int.tryParse(json['story_count'].toString()) ?? 0, 
     totalLikes: int.tryParse(json['total_likes'].toString()) ?? 0, 
     totalViews: int.tryParse(json['total_views'].toString()) ?? 0, 
@@ -45,6 +48,13 @@ class Profilepage extends StatefulWidget{
 }
 
 class _ProfilepageState extends State<Profilepage>{
+
+  bool isEditing=false;
+
+  late TextEditingController nameController;
+  late TextEditingController bioController;
+
+
   UserProfile? userProfile;
   List<Story> userStories=[];
   bool isLoading=true;
@@ -54,6 +64,27 @@ void initState(){
   super.initState();
   _loadUserProfile();
 }
+Future<void> _saveProfile() async {
+  final currentUser = FirebaseAuth.instance.currentUser;
+  if (currentUser == null) return;
+
+  final res = await http.post(
+    Uri.parse('http://192.168.1.6/littup_api/update_profile.php'),
+    body: {
+      'firebase_uid': currentUser.uid,
+      'name': nameController.text.trim(),
+      'bio': bioController.text.trim(),
+    },
+  );
+
+  if (res.statusCode == 200) {
+    setState(() {
+      userProfile!.name = nameController.text.trim();
+      userProfile!.bio = bioController.text.trim();
+    });
+  }
+}
+
 Future<void> _loadUserProfile() async {
     final currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser == null) return;
@@ -64,7 +95,15 @@ Future<void> _loadUserProfile() async {
           Uri.parse('http://192.168.1.6/littup_api/get_user.php?uid=${currentUser.uid}'));
       if (userRes.statusCode == 200) {
         final data = jsonDecode(userRes.body);
+        final profile=UserProfile.fromJson(data);
         setState(() => userProfile = UserProfile.fromJson(data));
+
+        setState((){
+          userProfile=profile;
+          nameController=TextEditingController(text: profile.name);
+          bioController=TextEditingController(text: profile.bio);
+
+        });
       }
 
       // Fetch user stories
@@ -74,6 +113,7 @@ Future<void> _loadUserProfile() async {
         final data = jsonDecode(storiesRes.body) as List;
         setState(() =>
             userStories = data.map((s) => Story.fromJson(s)).toList());
+            
       }
     } catch (e) {
       debugPrint('Error loading profile: $e');
@@ -81,6 +121,16 @@ Future<void> _loadUserProfile() async {
       setState(() => isLoading = false);
     }
   }
+
+@override
+void dispose() {
+  nameController.dispose();
+  bioController.dispose();
+  super.dispose();
+}
+
+  
+
 
   @override
 Widget build(BuildContext context){
@@ -146,9 +196,35 @@ Row(
                 
                 Column(
                   children: [
-                    Text(userProfile!.name,
+                    isEditing
+
+                    ? SizedBox(
+                      width: 250,
+                      child: TextField(
+                        controller: nameController,
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                          isDense: true,
+                        ),
+                      ),
+                    )
+                    : Text(userProfile!.name,
                     style: TextStyle( fontSize:18,fontWeight: FontWeight.bold)),
-                    Text('Passionate romance writer',style: TextStyle( fontSize:16,color: Colors.black26)), 
+                    isEditing
+                    ? SizedBox(
+                      width: 250,
+                      child: TextField(
+                        controller: bioController,
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                          isDense: true,
+                        ),
+                      ),
+                    )
+                    :Text(userProfile!.bio.isNotEmpty
+                    ? userProfile!.bio
+                    : 'No bio yet',
+                    style: TextStyle( fontSize:16,color: Colors.black26)), 
                                       ],
                 ),
               ],
@@ -159,11 +235,15 @@ Row(
               children: [
               ElevatedButton.icon(
               style: ElevatedButton.styleFrom(backgroundColor: Colors.white,),
-              onPressed: () {
-                   
+              onPressed: () async{
+                   if(isEditing){
+                    await _saveProfile();
+                   }
+                   setState(()=> isEditing = !isEditing);
               },
-              icon: const Icon(Icons.edit_outlined, color: Colors.black),
-              label: const Text('Edit Profile', style: TextStyle(color: Colors.black)),
+              icon:  Icon(
+                isEditing? Icons.check: Icons.edit_outlined, color: Colors.black),
+              label:  Text( isEditing ? 'Save' : 'Edit Profile', style: TextStyle(color: Colors.black)),
             ),
               ],
             ),

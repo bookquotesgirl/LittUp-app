@@ -46,7 +46,7 @@ Widget build(BuildContext context){
              ElevatedButton.icon(
               style: ElevatedButton.styleFrom(backgroundColor: Colors.black),
               onPressed: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context)=> const HomePage()));
+                    Navigator.push(context, MaterialPageRoute(builder: (context)=>  HomePage()));
 
               },
               icon: const Icon(Icons.home_outlined, color: Colors.white),
@@ -56,7 +56,7 @@ Widget build(BuildContext context){
               ElevatedButton.icon(
               style: ElevatedButton.styleFrom(backgroundColor: Colors.black),
               onPressed: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context)=> const Writepage()));
+                    Navigator.push(context, MaterialPageRoute(builder: (context)=>  Writepage()));
 
               },
               icon: const Icon(CupertinoIcons.pen, color: Colors.white),

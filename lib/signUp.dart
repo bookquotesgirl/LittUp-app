@@ -63,27 +63,35 @@ class _SignupPageState extends State<SignupPage> {
 
   final _formKey=GlobalKey<FormState>();
 
-  Future<void> signUpWithEmail() async {
-    if(!_formKey.currentState!.validate())
-    return;
-    try {
-      await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: emailController.text.trim(),
-        password: passwordController.text.trim(),
-      );
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Sign-up successful')),
-      );
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const LoginPage()),
-      );
-    } on FirebaseAuthException catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.message ?? "Sign-up failed")),
-      );
-    }
+ Future<void> signUpWithEmail() async {
+  if (!_formKey.currentState!.validate()) return;
+
+  try {
+    final userCredential=await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      email: emailController.text.trim(), 
+      password: passwordController.text.trim(),
+    );
+    await userCredential.user?.updateDisplayName(nameController.text.trim());
+    await userCredential.user?.reload();
+
+    print("Display Name set to: ${FirebaseAuth.instance.currentUser?.displayName}");
+
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Sign-up successful')),
+    );
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const LoginPage()),
+    );
+  } on FirebaseAuthException catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(e.message ?? "Sign-up failed")),
+    );
   }
+}
+
 
   Future<void> signInWithGoogle() async {
     try {

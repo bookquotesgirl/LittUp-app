@@ -1,255 +1,274 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import './widgets/appBar.dart';
-import 'home.dart';
-class Storypage extends StatefulWidget{
-    final Story story;
-  const Storypage({super.key, required this.story});
+import 'models/story.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
-@override
-  State<Storypage> createState() =>_StorypageState();
+
+
+
+class Comment {
+  final String username;
+  final String text;
+  final DateTime timestamp;
+
+  Comment({
+    required this.username,
+    required this.text,
+    required this.timestamp,
+  });
+
+  factory Comment.fromJson(Map<String, dynamic> json) {
+    return Comment(
+      username: json['username'] ?? 'Anonymous',
+      text: json['text'] ?? '',
+      timestamp: DateTime.parse(json['timestamp']),
+    );
+  }
 }
 
-class _StorypageState extends State<Storypage>{
 
- int views = 120;
-int likes = 38;
-List<String> comments = ['This is incredible'];
-final TextEditingController _commentController = TextEditingController();
-@override
-void initState() {
-  super.initState();
-  views++; 
-}
+class Storypage extends StatefulWidget {
+  final int storyId;
+  const Storypage({super.key, required this.storyId});
 
   @override
-Widget build(BuildContext context){
-  return Scaffold(
-        backgroundColor: Colors.white,
+  State<Storypage> createState() => _StorypageState();
+}
+
+class _StorypageState extends State<Storypage> {
+  Story? story;
+  List<Comment> comments = [];
+  bool isLoading = true;
+
+  final TextEditingController _commentController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchStory();
+  }
+
+  Future<void> _fetchStory() async {
+    try {
+      final response = await http.get(
+        Uri.parse('http://192.168.1.6/littup_api/get_story.php?story_id=${widget.storyId}'),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        setState(() {
+          story = Story.fromJson(data);
+          comments = (data['comments'] as List)
+              .map((c) => Comment.fromJson(c))
+              .toList();
+          isLoading = false;
+        });
+      } else {
+        debugPrint('Failed to fetch story');
+      }
+    } catch (e) {
+      debugPrint('Error fetching story: $e');
+    }
+  }
+
+ Future<void> _postComment(String text) async {
+  final currentUser = FirebaseAuth.instance.currentUser;
+  if (story == null || text.isEmpty || currentUser == null) return;
+
+  try {
+    final response = await http.post(
+      Uri.parse('http://192.168.1.6/littup_api/add_comment.php'),
+      body: {
+        'story_id': story!.id.toString(),
+        'user_uid': currentUser.uid,
+        'text': text,
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      final newComment = Comment.fromJson(data);
+      setState(() {
+        comments.add(newComment);
+        story!.commentsCount++;
+        _commentController.clear();
+      });
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent + 100,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    } else {
+      debugPrint('Failed to post comment, status: ${response.statusCode}, body: ${response.body}');
+    }
+  } catch (e) {
+    debugPrint('Error posting comment: $e');
+  }
+}
+
+
+
+
+  Future<void> _updateLikes() async {
+    if(story==null) return;
+      final response = await http.post(
+        Uri.parse('http://192.168.1.6/littup_api/like_story.php'),
+        body: {
+          'story_id': story!.id.toString(),
+         
+        },
+      );
+
+      if (response.statusCode == 200) {
+        setState(() => story!.likes++);
+      }
+   
+  }
+
+  String _formatTimeAgo(DateTime timestamp) {
+    final diff = DateTime.now().difference(timestamp);
+    if (diff.inSeconds < 60) return 'Just now';
+    if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
+    if (diff.inHours < 24) return '${diff.inHours}h ago';
+    return '${diff.inDays}d ago';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (isLoading) return const Scaffold(body: Center(child: CircularProgressIndicator()));
+
+    return Scaffold(
+      backgroundColor: Colors.white,
       appBar: const LittAppBar(),
       body: SingleChildScrollView(
-     padding: 
-      EdgeInsets.only(
-        top:20,
-        bottom:20,
-        left:120,
-        right:120,
-      ),
-      child: 
-      Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              IconButton(onPressed: (){
-                    Navigator.push(context, MaterialPageRoute(builder: (context)=> const HomePage()));
-
-              }, icon: Icon(Icons.arrow_back)),
-              SizedBox(width: 20,),
-            Text('Back to home'),
-            ],
-          ),
-          Title(color: Colors.black, child: 
-          Text('Finding Light',style: TextStyle(fontSize: 35,color: Colors.black, fontWeight: FontWeight.bold),),
-          ),
-          Row(
-            children: [
-              CircleAvatar(
-                radius: 25,
-                backgroundColor: Colors.grey,
-                child: Text('MC',style: TextStyle(fontSize: 20,color: Colors.black, fontWeight: FontWeight.bold),),
-              ),
-              SizedBox(width: 30,),
-              Text('Mike Chen',style: TextStyle(fontSize: 20,color: Colors.black, fontWeight: FontWeight.bold),),
-            ],
-          ),
-          Text(
-  '''
-
-Sometimes life knocks you down. You lose your job, a relationship ends, or you face a challenge that seems insurmountable. I know because I've been there.
-
-Two years ago, I was at my lowest point. I had just graduated from college with no job prospects, mounting debt, and a deep sense of failure. Every morning felt like a battle just to get out of bed.
-
-But here's what I learned: darkness makes you appreciate the light.
-
-I started small. I made a list of three things I was grateful for each day. At first, it felt forced. "I'm grateful for my morning coffee." "I'm grateful for sunny weather." But slowly, I started to notice more – a friend's text message, a stranger's smile, the way my cat purrs when I pet her.
-
-I volunteered at a local community center, helping kids with their homework. Seeing their faces light up when they understood a concept reminded me that I had value, that I could make a difference.
-
-I took online courses, networked, and applied to jobs even when rejection seemed certain. And eventually, after countless "no's," I got a "yes."
-
-Today, I'm not where I thought I'd be at 25, but I'm somewhere better. I'm stronger, more compassionate, and more grateful. The darkness taught me to find my own light, and now I try to share that light with others.
-
-If you're going through tough times, know this: you are stronger than you think, and this too shall pass.
-  ''',
-),
- Divider(
-  color: Colors.black, // Color of the line
-  thickness: 0.5,        // Thickness of the line
-  height: 20,          // Total height of the box, padding is computed from this
- 
-       // Empty space at the end (right) of the line
-),
-Padding(padding: 
-EdgeInsets.only(
-  top: 20,
-),
-child:
-Row(
-children: [
-    ElevatedButton.icon(
-  style: ElevatedButton.styleFrom(backgroundColor: Colors.black),
-  onPressed: () {
-    setState(() {
-      likes++;
-    });
-  },
-  icon: const Icon(Icons.favorite, color: Colors.white),
-  label: Text('$likes', style: const TextStyle(color: Colors.white)),
-),
-
-            SizedBox(width:40),
-            Icon(Icons.messenger_outline_rounded,color: Colors.grey,),
-            SizedBox(width:10),
-            Text('${comments.length} Comments'),
-
-            SizedBox(width:40),
-             Icon(Icons.remove_red_eye_outlined,color: Colors.grey,),
-            SizedBox(width:10),
-            Text('120 Reads'),
-],
-),
-),
- Divider(
-  color: Colors.black, // Color of the line
-  thickness: 0.5,        // Thickness of the line
-  height: 20,          // Total height of the box, padding is computed from this
- 
-       // Empty space at the end (right) of the line
-),
-Text('Comments (1)'),
-Container(
-  
-    decoration: BoxDecoration(
-              border: Border.all(
-                color: Colors.black,
-                width: 1.0,
-              ),
-              borderRadius: BorderRadius.circular(15),
+        controller: _scrollController,
+        padding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width * 0.05, vertical: 20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Back button
+            Row(
+              children: [
+                IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.arrow_back)),
+                const SizedBox(width: 20),
+                const Text('Back to home'),
+              ],
             ),
-  child: 
-  Padding(padding:
-  EdgeInsets.all(40),
-  child:
-  Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      TextField(
-  controller: _commentController,
-  decoration: InputDecoration(
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(16),
-    ),
-    hintText: 'Share your thoughts...',
-  ),
-  keyboardType: TextInputType.multiline,
-),
 
-      SizedBox(height: 30,),
-      ElevatedButton(
+            // Title & author
+            Text(story!.title, style: const TextStyle(fontSize: 35, fontWeight: FontWeight.bold)),
+            Row(
+              children: [
+                CircleAvatar(
+                  radius: 25,
+                  backgroundColor: Colors.grey,
+                  child: Text(
+                    story!.author.isNotEmpty ? story!.author[0].toUpperCase() : 'A',
+                    style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+                  ),
+                ),
+                const SizedBox(width: 20),
+                Text(story!.author.isNotEmpty ? story!.author : 'Anonymous',
+                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              ],
+            ),
+
+            const SizedBox(height: 20),
+            Text(story!.content, style: const TextStyle(fontSize: 16, height: 1.5)),
+
+            const Divider(thickness: 0.5, color: Colors.black, height: 20),
+
+            Row(
+              children: [
+                ElevatedButton.icon(
+                  onPressed: _updateLikes,
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.black),
+                  icon: const Icon(Icons.favorite, color: Colors.white),
+                  label: Text('${story!.likes}', style: const TextStyle(color: Colors.white)),
+                ),
+                const SizedBox(width: 40),
+                Icon(Icons.messenger_outline_rounded, color: Colors.grey),
+                const SizedBox(width: 10),
+                Text('${story!.commentsCount} Comments'),
+                const SizedBox(width: 40),
+                Icon(Icons.remove_red_eye_outlined, color: Colors.grey),
+                const SizedBox(width: 10),
+                Text('${story!.views} Reads'),
+              ],
+            ),
+
+            const Divider(thickness: 0.5, color: Colors.black, height: 20),
+
+            // Add comment
+            const Text('Add a Comment', style: TextStyle(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 10),
+           
+            TextField(
+              controller: _commentController,
+              decoration: InputDecoration(
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+                  hintText: 'Write a comment...'),
+              keyboardType: TextInputType.multiline,
+            ),
+            const SizedBox(height: 10),
+            ElevatedButton(
   onPressed: () {
-    final text=_commentController.text.trim();
-    if(text.isEmpty)
-     return;
-
-    setState(() {
-      widget.story.comments.add(text);
-      
-      _commentController.clear();
-    });
+    final text = _commentController.text.trim();
+    _postComment(text);
   },
   style: ElevatedButton.styleFrom(backgroundColor: Colors.black),
   child: const Text('Post comment', style: TextStyle(color: Colors.white)),
 ),
-Column(
-  children:widget.story.comments.map((comment){
-    return Padding(padding: 
-    const EdgeInsets.only(top:20),
-    child: Text(comment),
-    );
-  }).toList(),
-   
-)
-    ],
-  ),
-  ),
-),
-      SizedBox(height: 30,),
-Container(
-  
-    decoration: BoxDecoration(
-              border: Border.all(
-                color: Colors.black,
-                width: 1.0,
-              ),
-              borderRadius: BorderRadius.circular(15),
+
+
+            const SizedBox(height: 20),
+            // Comments list
+            Column(
+              children: comments.map((comment) {
+                return Padding(
+                  padding: const EdgeInsets.only(top: 20),
+                  child: Container(
+                    decoration: BoxDecoration(border: Border.all(color: Colors.black), borderRadius: BorderRadius.circular(15)),
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              CircleAvatar(
+                                radius: 20,
+                                backgroundColor: Colors.grey,
+                                child: Text(
+                                  comment.username[0].toUpperCase(),
+                                  style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+                                ),
+                              ),
+                              const SizedBox(width: 20),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(comment.username, style: const TextStyle(fontWeight: FontWeight.bold)),
+                                  Text(_formatTimeAgo(comment.timestamp), style: const TextStyle(fontSize: 12)),
+                                ],
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                          Text(comment.text, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
             ),
-  child: 
-  Padding(padding:
-  EdgeInsets.all(40),
-  child:
-  Column(
-  children: comments.map((comment) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 20),
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.black),
-          borderRadius: BorderRadius.circular(15),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(40),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  const CircleAvatar(
-                    radius: 20,
-                    backgroundColor: Colors.grey,
-                    child: Text('ED'),
-                  ),
-                  const SizedBox(width: 20),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
-                      Text('Emma Davis',
-                          style: TextStyle(fontWeight: FontWeight.bold)),
-                      Text('Just now'),
-                    ],
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              Text(
-                comment,
-                style:
-                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-              ),
-            ],
-          ),
+          ],
         ),
       ),
     );
-  }).toList(),
-),
-
-  ),
-),
-        ],
-      ),
-      )
-  
-  );
-      }
-
+  }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:littup/home.dart';
 import 'package:littup/signUp.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -71,6 +72,19 @@ class _LoginPageState extends State<LoginPage>{
   bool isLoading=false;
   bool _obscurePassword=true;
 
+Future<void> syncUserToBackend(User user) async {
+  final url = Uri.parse('http://192.168.1.6/littup_api/sync_user.php');
+
+  await http.post(
+    url,
+    body: {
+      'firebase_uid': user.uid,
+      'name': user.displayName ?? '',
+      'email': user.email ?? '',
+    },
+  );
+}
+
   Future<void>signInWithEmail() async{
     if(!_formKey.currentState!.validate())
     return;
@@ -79,7 +93,14 @@ class _LoginPageState extends State<LoginPage>{
     try{
       await FirebaseAuth.instance.signInWithEmailAndPassword(email: emailController.text.trim(), password: passwordController.text,
       );
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_)=>const HomePage()),
+      final user = FirebaseAuth.instance.currentUser;
+      if(user!=null){
+        await syncUserToBackend(user);
+      }
+      final authorName = user?.displayName ?? user?.email ?? "Anonymous"; 
+
+      print("Logged in user: $authorName");
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_)=> HomePage(authorName: authorName),),
       );
     }on FirebaseAuthException catch (e){
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message??'Login failed')),
@@ -100,7 +121,12 @@ Future<void>signInWithGoogle() async{
       idToken: googleAuth.idToken,
     );
      await FirebaseAuth.instance.signInWithCredential(credential);
-     Navigator.pushReplacement(context, MaterialPageRoute(builder: (_)=>const HomePage()),
+     final user = FirebaseAuth.instance.currentUser;
+      if(user!=null){
+        await syncUserToBackend(user);
+      }
+final authorName = user?.displayName ?? user?.email ?? "Anonymous";
+     Navigator.pushReplacement(context, MaterialPageRoute(builder: (_)=> HomePage(authorName: authorName),),
      );
   }catch(e){
     ScaffoldMessenger.of(context).showSnackBar(

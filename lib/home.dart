@@ -1,31 +1,29 @@
 import 'package:flutter/material.dart';
-
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import './widgets/appBar.dart';
+import 'models/story.dart';
 import 'storyPage.dart';
-class Story {
-  final String title;
-  final String author;
-  final String genre;
-  final String image;
+import 'package:timeago/timeago.dart' as timeago;
 
-  int likes;
-  int views;
-  List<String> comments; 
 
-  Story({
-    required this.title,
-    required this.author,
-    required this.genre,
-    required this.image,
-    this.likes = 0,
-    this.views = 0,
-    List<String>? comments,
-  }) : comments = comments ?? [];
+Future<List<Story>> fetchStories() async {
+  final response = await http.get(Uri.parse('http://192.168.1.6/littup_api/get_stories.php'));
+
+  if (response.statusCode == 200) {
+    List data = jsonDecode(response.body);
+    return data.map((story) => Story.fromJson(story)).toList();
+  } else {
+    throw Exception('Failed to load stories');
+  }
 }
 
 
+
 class HomePage extends StatefulWidget{
-  const HomePage({super.key});
+  final String? authorName;
+  
+  const HomePage({super.key,  this.authorName});
 
 @override
   State<HomePage> createState() =>_HomePageState();
@@ -36,16 +34,27 @@ class _HomePageState extends State<HomePage>{
  final TextEditingController _searchController=TextEditingController();
 
   final List<Story> allStories=[
-    Story(title: 'Finding Light', author: 'John Doe', genre: 'Romance', image: 'images/download.jpeg'),
-    Story(title: 'Campus Days', author: 'Sara Lee', genre: 'Student Life', image: 'images/download.jpeg'),
+    
   ];
    List<Story> filteredStories=[];
 
   @override
   void initState(){
     super.initState();
-    filteredStories=List.from(allStories);
+    _loadStories();
   }
+  Future<void> _loadStories() async {
+  try {
+    final stories = await fetchStories();
+    setState(() {
+      allStories.clear();
+      allStories.addAll(stories);
+      filteredStories = List.from(allStories);
+    });
+  } catch (e) {
+    debugPrint('Error loading stories: $e');
+  }
+}
   void _applyFilters(){
     final query=_searchController.text.toLowerCase();
     setState(() {
@@ -63,7 +72,6 @@ class _HomePageState extends State<HomePage>{
     'All Catagories',
     'Romance',
     'Student Life',
-    'Most Recent',
   ];
   @override
 Widget build(BuildContext context){
@@ -189,7 +197,7 @@ backgroundColor: const WidgetStatePropertyAll<Color>(Colors.white), // Set the b
   onTap: () {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => Storypage(story: story)),
+      MaterialPageRoute(builder: (context) => Storypage(storyId: story.id)),
     );
   },
   child: Column(
@@ -201,8 +209,8 @@ backgroundColor: const WidgetStatePropertyAll<Color>(Colors.white), // Set the b
           borderRadius: const BorderRadius.vertical(
             top: Radius.circular(15),
           ),
-          child: Image.asset(
-            story.image,
+          child: Image.network(
+            story.cover.isNotEmpty? story.cover:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR9SRRmhH4X5N2e4QalcoxVbzYsD44C-sQv-w&s',
             fit: BoxFit.cover,
           ),
         ),
@@ -240,11 +248,11 @@ backgroundColor: const WidgetStatePropertyAll<Color>(Colors.white), // Set the b
 
       const SizedBox(height: 6),
 
-      const Padding(
-        padding: EdgeInsets.symmetric(horizontal: 12),
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12),
         child: Text(
-          '1 year ago',
-          style: TextStyle(fontSize: 13),
+          timeago.format(story.createdAt),
+          style: const TextStyle(fontSize: 13),
         ),
       ),
 
@@ -258,11 +266,11 @@ backgroundColor: const WidgetStatePropertyAll<Color>(Colors.white), // Set the b
             SizedBox(width: 16),
             Icon(Icons.messenger_outline_rounded, size: 14, color: Colors.grey),
             SizedBox(width: 4),
-            Text('${story.comments.length}', style: TextStyle(fontSize: 12)),
+            Text('${story.commentsCount}', style: TextStyle(fontSize: 12)),
             SizedBox(width: 16),
             Icon(Icons.remove_red_eye_outlined, size: 14, color: Colors.grey),
             SizedBox(width: 4),
-            Text('$story.views', style: TextStyle(fontSize: 12)),
+            Text('${story.views}', style: TextStyle(fontSize: 12)),
           ],
         ),
       ),

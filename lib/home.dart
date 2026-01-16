@@ -75,13 +75,31 @@ class _HomePageState extends State<HomePage>{
   ];
   @override
 Widget build(BuildContext context){
+  final screenWidth= MediaQuery.of( context).size.width;
+
+  final bool isMobile=screenWidth < 600;
+
+  final double horizontalPadding=isMobile ? 16.0 : 60.0;
+
+ int crossAxisCount;
+
+if (screenWidth < 600) {
+  crossAxisCount = 1; // phones
+} else if (screenWidth < 900) {
+  crossAxisCount = 2; // tablets
+} else {
+  crossAxisCount = 3; // desktop / web
+}
+
       return Scaffold(
         backgroundColor: Colors.white,
         
       appBar: const LittAppBar(),
 
       body:Padding(padding: 
-      const EdgeInsets.all(60),
+      EdgeInsets.symmetric(horizontal: horizontalPadding,
+      vertical: 20,
+      ),
       child: 
        Column(
         children: [
@@ -90,80 +108,72 @@ Widget build(BuildContext context){
           child: Text('Discover Stories', style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),),
 
           ),
-          SizedBox(
-            width: double.infinity,
-            height: 80,
-            
-          child: Row(
-            children: [
-              Expanded(child: 
-              SearchBar(
-                controller: _searchController,
-                onChanged:(_)=> _applyFilters(),
-                constraints: BoxConstraints(
-                  minHeight: 40,
-                  maxHeight: 80,
-                ),
-                side: WidgetStateProperty.all<BorderSide>(
-    const BorderSide(
-      color: Colors.black26, 
-      width: 1.0, 
-    ),
-  ),
-backgroundColor: const WidgetStatePropertyAll<Color>(Colors.white), // Set the background color
-  surfaceTintColor: const WidgetStatePropertyAll<Color>(Colors.transparent),   //to prevent overlay
-  elevation: WidgetStateProperty.all(0),         
-  leading: Icon(Icons.search),
-            hintText:  'Search by title, author or genre',
-            
-            shape: WidgetStateProperty.all(
-              RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              )
+         SizedBox(
+  width: double.infinity,
+  child: Wrap(
+    spacing: 20,
+    runSpacing: 12,
+    children: [
+      SizedBox(
+        width: isMobile ? screenWidth : screenWidth * 0.6,
+        child: SearchBar(
+          controller: _searchController,
+          onChanged: (_) => _applyFilters(),
+          constraints: const BoxConstraints(
+            minHeight: 40,
+            maxHeight: 80,
+          ),
+          side: WidgetStateProperty.all(
+            const BorderSide(color: Colors.black26),
+          ),
+          backgroundColor:
+              const WidgetStatePropertyAll<Color>(Colors.white),
+          surfaceTintColor:
+              const WidgetStatePropertyAll<Color>(Colors.transparent),
+          elevation: WidgetStateProperty.all(0),
+          leading: const Icon(Icons.search),
+          hintText: 'Search by title, author or genre',
+          shape: WidgetStateProperty.all(
+            RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
             ),
-            
           ),
-              ),
-              const SizedBox(width: 20),
-              SizedBox(
-                height: 40,
-  width: 220,
-  child: 
-              InputDecorator(
-                decoration: const InputDecoration(border: OutlineInputBorder(
-                
-                ),
-                contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 0),),
-                
-                child: DropdownButtonHideUnderline(
-                  
-                  child: 
-              DropdownButton(
-                elevation: 0,
-                value: dropdownvalue,
-                items:
-                 items.map((String items){
-                  return DropdownMenuItem(
+        ),
+      ),
 
-                    value: items,
-                    child: Text(items));
-                 }
-                 ).toList(), 
-                 onChanged:
-                  (String? newValue){
-                    setState(() {
-                      dropdownvalue=newValue!;
-                    });
-                    _searchController.clear();
-                    _applyFilters();
-                  },
-                ),
-                ),),
-              ),
-            ],
-          
+      SizedBox(
+        width: isMobile ? screenWidth : 220,
+        height: 40,
+        child: InputDecorator(
+          decoration: const InputDecoration(
+            border: OutlineInputBorder(),
+            contentPadding:
+                EdgeInsets.symmetric(horizontal: 10, vertical: 0),
           ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton(
+              value: dropdownvalue,
+              items: items.map((String item) {
+                return DropdownMenuItem(
+                  value: item,
+                  child: Text(item),
+                );
+              }).toList(),
+              onChanged: (String? newValue) {
+                setState(() {
+                  dropdownvalue = newValue!;
+                });
+                _searchController.clear();
+                _applyFilters();
+              },
+            ),
           ),
+        ),
+      ),
+    ],
+  ),
+),
+
          
           Expanded(
             child: filteredStories.isEmpty?
@@ -175,11 +185,11 @@ backgroundColor: const WidgetStatePropertyAll<Color>(Colors.white), // Set the b
                   )
             : GridView.builder(
               padding: const EdgeInsets.all(12),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: crossAxisCount,
                 crossAxisSpacing: 12,
                 mainAxisSpacing: 12,
-                childAspectRatio: 1.0,
+                childAspectRatio: isMobile ? 0.85 : 1.0,
                 ), 
                 
                 itemCount: filteredStories.length,
@@ -203,6 +213,7 @@ backgroundColor: const WidgetStatePropertyAll<Color>(Colors.white), // Set the b
   child: Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
+      Expanded(child: 
       AspectRatio(
         aspectRatio: 16 / 9,
         child: ClipRRect(
@@ -215,7 +226,7 @@ backgroundColor: const WidgetStatePropertyAll<Color>(Colors.white), // Set the b
           ),
         ),
       ),
-
+      ),
       Padding(
         padding: const EdgeInsets.all(12),
         child: Row(
@@ -223,8 +234,8 @@ backgroundColor: const WidgetStatePropertyAll<Color>(Colors.white), // Set the b
             Expanded(
               child: Text(
                 story.title,
-                style: const TextStyle(
-                  fontSize: 16,
+                style:  TextStyle(
+                  fontSize: isMobile ? 14 : 16,
                   fontWeight: FontWeight.bold,
                 ),
                 overflow: TextOverflow.ellipsis,
@@ -242,6 +253,7 @@ backgroundColor: const WidgetStatePropertyAll<Color>(Colors.white), // Set the b
         padding: const EdgeInsets.symmetric(horizontal: 12),
         child: Text(
           'by ${story.author}',
+          maxLines: 1,
           style: const TextStyle(fontSize: 14),
         ),
       ),
@@ -260,15 +272,15 @@ backgroundColor: const WidgetStatePropertyAll<Color>(Colors.white), // Set the b
         padding: const EdgeInsets.all(12),
         child: Row(
           children:  [
-            Icon(Icons.favorite_border, size: 14, color: Colors.grey),
+            Icon(Icons.favorite_border, size: isMobile ? 12: 14, color: Colors.grey),
             SizedBox(width: 4),
             Text('${story.likes}', style: TextStyle(fontSize: 12)),
             SizedBox(width: 16),
-            Icon(Icons.messenger_outline_rounded, size: 14, color: Colors.grey),
+            Icon(Icons.messenger_outline_rounded, size: isMobile ? 12:14, color: Colors.grey),
             SizedBox(width: 4),
             Text('${story.commentsCount}', style: TextStyle(fontSize: 12)),
             SizedBox(width: 16),
-            Icon(Icons.remove_red_eye_outlined, size: 14, color: Colors.grey),
+            Icon(Icons.remove_red_eye_outlined, size: isMobile ? 12:14, color: Colors.grey),
             SizedBox(width: 4),
             Text('${story.views}', style: TextStyle(fontSize: 12)),
           ],

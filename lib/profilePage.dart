@@ -84,6 +84,16 @@ Future<void> _saveProfile() async {
     });
   }
 }
+Widget _statItem(String value, String label) {
+  return Column(
+    children: [
+      Text(value,
+          style: const TextStyle(
+              fontSize: 26, fontWeight: FontWeight.bold)),
+      Text(label),
+    ],
+  );
+}
 
 Future<void> _loadUserProfile() async {
     final currentUser = FirebaseAuth.instance.currentUser;
@@ -134,6 +144,13 @@ void dispose() {
 
   @override
 Widget build(BuildContext context){
+  final screenWidth= MediaQuery.of( context).size.width;
+ final bool isMobile=screenWidth < 600;
+
+  final double horizontalPadding=isMobile ? 16.0 : 60.0;
+
+
+
   if(isLoading){
     return const Scaffold(
       body: Center(child: CircularProgressIndicator()),
@@ -147,11 +164,9 @@ Widget build(BuildContext context){
       body: SingleChildScrollView(
         child: 
       Padding(padding: 
-      EdgeInsets.only(
-        top: 15,
-        bottom: 15,
-        left: 160,
-        right:160,
+      EdgeInsets.symmetric(
+        horizontal: horizontalPadding,
+        vertical: 15,
       ),
       child: 
       Column(
@@ -175,11 +190,12 @@ Widget build(BuildContext context){
             child: Column(
               children: [
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
 Row(
                 children: [
                   CircleAvatar(
-                    radius: 50,
+                    radius: 28,
                     backgroundColor: const Color.fromARGB(255, 240, 238, 238),
                     child: Text(userProfile!.name.isNotEmpty
                      ? userProfile!.name[0].toUpperCase()
@@ -190,11 +206,11 @@ Row(
                 ],
             ),
             SizedBox(width: 20,),
-Row(
+Expanded(
 
-              children: [
-                
+                child:
                 Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     isEditing
 
@@ -210,6 +226,7 @@ Row(
                     )
                     : Text(userProfile!.name,
                     style: TextStyle( fontSize:18,fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 8,),
                     isEditing
                     ? SizedBox(
                       width: 250,
@@ -227,7 +244,7 @@ Row(
                     style: TextStyle( fontSize:16,color: Colors.black26)), 
                                       ],
                 ),
-              ],
+              
             ),
             Spacer(),
 
@@ -249,37 +266,21 @@ Row(
             ),
                   ],
                 ),
-            
+            const SizedBox(height: 20,),
                 Padding(padding:
-                const EdgeInsets.only(
-                  left: 80,
-                  right: 80,
+                EdgeInsets.symmetric(
+                  horizontal: isMobile ? 20: 80,
                 ),
                 child: 
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+              Wrap(
+                alignment: WrapAlignment.spaceAround,
+                spacing: 40,
+                runSpacing: 16,
                 children: [
-                  Column(
-                    children: [
-                      Text('${userProfile!.storyCount}',style: TextStyle(fontSize: 30,fontWeight: FontWeight.bold, ),),
-                      Text('Stories'),
-                    ],
-                  ),
-                  Spacer(),
-                  Column(
-                    children: [
-                      Text('${userProfile!.totalLikes}',style: TextStyle(fontSize: 30,fontWeight: FontWeight.bold, ),),
-                      Text('Likes'),
-                    ],
-                  ),
-                  Spacer(),
-
-                  Column(
-                    children: [
-                      Text('${userProfile!.totalViews}',style: TextStyle(fontSize: 30,fontWeight: FontWeight.bold, ),),
-                      Text('Total reads'),
-                    ],
-                  ),
+                  
+                    _statItem('${userProfile!.storyCount}', 'Stories'),
+    _statItem('${userProfile!.totalLikes}', 'Likes'),
+    _statItem('${userProfile!.totalViews}', 'Total reads'),
                 ],
 
               ),
@@ -335,11 +336,11 @@ Row(
   shrinkWrap: true,
   physics: const NeverScrollableScrollPhysics(),
   padding: const EdgeInsets.all(12),
-  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-    crossAxisCount: 3,
+  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+    crossAxisCount: isMobile ? 1: 3,
     crossAxisSpacing: 12,
     mainAxisSpacing: 12,
-    childAspectRatio: 0.72, 
+    childAspectRatio:isMobile ?1.1: 0.72, 
   ),
   itemCount: userStories.length,
   itemBuilder: (context, index) {
@@ -361,6 +362,7 @@ Row(
   child: Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
+      Expanded(child: 
       AspectRatio(
         aspectRatio: 16 / 9,
         child: ClipRRect(
@@ -373,7 +375,7 @@ Row(
           ),
         ),
       ),
-
+      ),
       Padding(
         padding: const EdgeInsets.all(12),
         child: Row(
@@ -381,8 +383,8 @@ Row(
             Expanded(
               child: Text(
                 story.title,
-                style: const TextStyle(
-                  fontSize: 16,
+                style:  TextStyle(
+                  fontSize: isMobile ? 14 : 16,
                   fontWeight: FontWeight.bold,
                 ),
                 overflow: TextOverflow.ellipsis,
@@ -400,6 +402,8 @@ Row(
         padding: const EdgeInsets.symmetric(horizontal: 12),
         child: Text(
           'by ${story.author}',
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
           style: const TextStyle(fontSize: 14),
         ),
       ),
@@ -418,15 +422,15 @@ Row(
         padding: const EdgeInsets.all(12),
         child: Row(
           children:  [
-            Icon(Icons.favorite_border, size: 14, color: Colors.grey),
+            Icon(Icons.favorite_border, size: isMobile ? 12: 14, color: Colors.grey),
             SizedBox(width: 4),
             Text('${story.likes}', style: TextStyle(fontSize: 12)),
             SizedBox(width: 16),
-            Icon(Icons.messenger_outline_rounded, size: 14, color: Colors.grey),
+            Icon(Icons.messenger_outline_rounded, size: isMobile ? 12:14, color: Colors.grey),
             SizedBox(width: 4),
             Text('${story.commentsCount}', style: TextStyle(fontSize: 12)),
             SizedBox(width: 16),
-            Icon(Icons.remove_red_eye_outlined, size: 14, color: Colors.grey),
+            Icon(Icons.remove_red_eye_outlined, size: isMobile ? 12:14, color: Colors.grey),
             SizedBox(width: 4),
             Text('${story.views}', style: TextStyle(fontSize: 12)),
           ],

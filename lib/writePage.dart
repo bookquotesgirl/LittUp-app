@@ -187,7 +187,6 @@ request.fields['author_name'] = authorName;
                 onChanged: (v) => setState(() => category = v!),
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
-                  labelText: 'Category',
                 ),
               ),
                     SizedBox(height: 20),

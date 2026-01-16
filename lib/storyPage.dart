@@ -52,6 +52,7 @@ class _StorypageState extends State<Storypage> {
   }
 
   Future<void> _fetchStory() async {
+
     try {
       final response = await http.get(
         Uri.parse('http://192.168.1.6/littup_api/get_story.php?story_id=${widget.storyId}'),
@@ -112,21 +113,36 @@ class _StorypageState extends State<Storypage> {
 
 
 
-  Future<void> _updateLikes() async {
-    if(story==null) return;
-      final response = await http.post(
-        Uri.parse('http://192.168.1.6/littup_api/like_story.php'),
-        body: {
-          'story_id': story!.id.toString(),
-         
-        },
-      );
+ Future<void> _updateLikes() async {
+  if (story == null) return;
+  final currentUser = FirebaseAuth.instance.currentUser;
+  if (currentUser == null) return;
 
-      if (response.statusCode == 200) {
-        setState(() => story!.likes++);
-      }
-   
+  try {
+    final response = await http.post(
+      Uri.parse('http://192.168.1.6/littup_api/like_story.php'),
+      headers: {"Content-type": "application/x-www-form-urlencoded"},
+      body: {
+        'story_id': story!.id.toString(),
+        'user_uid': currentUser.uid,
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      setState(() {
+        story!.likes = data['likes'];
+        story!.likedByCurrentUser = data['liked_by_current_user'];
+      });
+    } else {
+      debugPrint('Failed to toggle like, status: ${response.statusCode}');
+    }
+  } catch (e) {
+    debugPrint('Error toggling like: $e');
   }
+}
+
+
 
   String _formatTimeAgo(DateTime timestamp) {
     final diff = DateTime.now().difference(timestamp);
@@ -185,7 +201,8 @@ class _StorypageState extends State<Storypage> {
               children: [
                 ElevatedButton.icon(
                   onPressed: _updateLikes,
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.black),
+                  style: ElevatedButton.styleFrom
+                  (backgroundColor: story!.likedByCurrentUser ? Colors.red : Colors.black,),
                   icon: const Icon(Icons.favorite, color: Colors.white),
                   label: Text('${story!.likes}', style: const TextStyle(color: Colors.white)),
                 ),

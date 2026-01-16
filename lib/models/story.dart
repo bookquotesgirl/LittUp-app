@@ -9,6 +9,7 @@ class Story {
    int views;
    int commentsCount;
   final DateTime createdAt;
+  bool likedByCurrentUser;
 
   Story({
     required this.id,
@@ -21,6 +22,7 @@ class Story {
     required this.views,
     required this.commentsCount,
     required this.createdAt,
+    this.likedByCurrentUser=false,
   });
 
  factory Story.fromJson(Map<String, dynamic> json) {
@@ -36,7 +38,18 @@ class Story {
 
     commentsCount: int.parse(json['commentsCount'].toString()),
     createdAt: DateTime.parse(json['createdAt']),
+    likedByCurrentUser: (){ 
+      final val= json['liked_by_current_user'];
+      if(val==null) return false;
+      if (val is bool) return val;
+      if (val is int) return val==1;
+      if (val is String) return val=='1' || val.toLowerCase()=='true';
+
+      return false;
+    }(),
+
   );
+ 
 }
 
 }
